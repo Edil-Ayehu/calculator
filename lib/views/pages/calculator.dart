@@ -1,9 +1,9 @@
+import 'package:calculator/controllers/theme_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Calculator extends StatefulWidget {
-  final VoidCallback onThemeToggle;
-
-  const Calculator({Key? key, required this.onThemeToggle}) : super(key: key);
+  const Calculator({Key? key}) : super(key: key);
 
   @override
   _CalculatorState createState() => _CalculatorState();
@@ -34,7 +34,7 @@ class _CalculatorState extends State<Calculator> {
 
   @override
   Widget build(BuildContext context) {
-    // Get current theme brightness
+    final themeController = Provider.of<ThemeController>(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     Color functionColor = Color(0xFF4CD9B0);
     Color operatorColor = Color(0xFFFF5A5A);
@@ -57,7 +57,7 @@ class _CalculatorState extends State<Calculator> {
                           : Icons.nightlight_round,
                       color: isDarkMode ? Colors.white : Colors.black,
                     ),
-                    onPressed: widget.onThemeToggle,
+                    onPressed: themeController.toggleTheme,
                   ),
                 ],
               ),

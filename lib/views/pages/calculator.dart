@@ -79,21 +79,15 @@ class _CalculatorState extends State<Calculator> {
         child: Column(
           children: [
             // Single Theme Toggle Icon
-            Padding(
-              padding: EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      isDarkMode
-                          ? Icons.wb_sunny_outlined
-                          : Icons.nightlight_round,
-                      color: isDarkMode ? Colors.white : Colors.black,
-                    ),
-                    onPressed: themeController.toggleTheme,
-                  ),
-                ],
+            Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.all(16),
+              child: IconButton(
+                icon: Icon(
+                  isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
+                onPressed: themeController.toggleTheme,
               ),
             ),
 

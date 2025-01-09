@@ -1,10 +1,9 @@
 import 'package:calculator/controllers/theme_controller.dart';
+import 'package:calculator/services/calculator_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:math_expressions/math_expressions.dart';
 
 class Calculator extends StatefulWidget {
-  
   const Calculator({Key? key}) : super(key: key);
 
   @override
@@ -12,91 +11,42 @@ class Calculator extends StatefulWidget {
 }
 
 class _CalculatorState extends State<Calculator> {
-  String _expression = '';
-  String _result = '0';
-  bool _shouldReset = false;
-  
+  final CalculatorService _calculatorService = CalculatorService();
+
   void _onButtonPressed(String value) {
     setState(() {
-      if (_shouldReset) {
-        _expression = '';
-        _shouldReset = false;
-      }
-
       switch (value) {
         case 'AC':
-          _expression = '';
-          _result = '0';
+          _calculatorService.clear();
           break;
         case '=':
-          try {
-            _result = _calculateResult();
-            _expression = _result;
-            _shouldReset = true;
-          } catch (e) {
-            _result = 'Error';
-          }
+          _calculatorService.result = _calculatorService.calculateResult();
+          _calculatorService.expression = _calculatorService.result;
+          _calculatorService.shouldReset = true;
           break;
         case '±':
-          if (_expression.startsWith('-')) {
-            _expression = _expression.substring(1);
-          } else if (_expression.isNotEmpty) {
-            _expression = '-$_expression';
-          }
+          _calculatorService.toggleSign();
           break;
         case '%':
-          if (_expression.isNotEmpty) {
-            final value = double.parse(_expression) / 100;
-            _expression = value.toString();
-          }
+          _calculatorService.calculatePercentage();
           break;
         case '↺':
-          if (_expression.isNotEmpty) {
-            _expression = _expression.substring(0, _expression.length - 1);
-            if (_expression.isEmpty) _result = '0';
-          }
+          _calculatorService.backspace();
           break;
         default:
-          _expression += value;
+          _calculatorService.addToExpression(value);
           break;
       }
 
       // Update result in real-time for basic operations
-      if (value != '=' && _expression.isNotEmpty) {
+      if (value != '=' && _calculatorService.expression.isNotEmpty) {
         try {
-          _result = _calculateResult();
+          _calculatorService.result = _calculatorService.calculateResult();
         } catch (e) {
           // If calculation fails, keep the previous result
         }
       }
     });
-  }
-
-  String _calculateResult() {
-    String expression = _expression;
-    expression = expression.replaceAll('×', '*');
-    expression = expression.replaceAll('÷', '/');
-    expression = expression.replaceAll('−', '-');
-
-    // Handle negative numbers
-    expression = expression.replaceAll('--', '+');
-
-    try {
-      // Parse and evaluate the expression
-      final parser = Parser();
-      final contextModel = ContextModel();
-      final exp = parser.parse(expression);
-      final result = exp.evaluate(EvaluationType.REAL, contextModel);
-
-      // Format the result
-      if (result % 1 == 0) {
-        return result.toInt().toString();
-      } else {
-        return result.toStringAsFixed(8).replaceAll(RegExp(r'0*$'), '').replaceAll(RegExp(r'\.$'), '');
-      }
-    } catch (e) {
-      throw Exception('Invalid expression');
-    }
   }
 
   Widget _buildButton(String text,
@@ -156,7 +106,7 @@ class _CalculatorState extends State<Calculator> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      _expression,
+                      _calculatorService.expression,
                       style: TextStyle(
                         fontSize: 24,
                         color: isDarkMode ? Colors.white70 : Colors.black54,
@@ -164,7 +114,7 @@ class _CalculatorState extends State<Calculator> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      _result,
+                      _calculatorService.result,
                       style: TextStyle(
                         fontSize: 48,
                         fontWeight: FontWeight.bold,
